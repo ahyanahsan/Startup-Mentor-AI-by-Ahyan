@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup Mentor AI - Autonomous Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap');
+        
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif; 
+            background-color: #f8fafc; 
+        }
+
+        .chat-container::-webkit-scrollbar { width: 5px; }
+        .chat-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dev-badge {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            transition: transform 0.3s ease;
+        }
+
+        .dev-badge:hover {
+            transform: translateY(-2px);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 15px rgba(79, 70, 229, 0.2);
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        .loading-pulse { animation: pulse-soft 2s infinite; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Navbar -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm z-50">
+        <div class="flex items-center gap-4">
+            <div class="bg-indigo-600 p-2.5 rounded-2xl text-white shadow-lg shadow-indigo-200">
+                <i class="fas fa-rocket text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-xl md:text-2xl text-slate-900 tracking-tight glow-text">Startup Mentor AI</h1>
+                <p class="text-[10px] md:text-xs text-indigo-500 font-bold uppercase tracking-[0.15em]">Autonomous Intelligence System</p>
+            </div>
+        </div>
+        <div class="bg-slate-100 rounded-full p-1.5 flex border border-slate-200">
+            <button onclick="setLanguage('en')" id="btn-en" class="px-4 py-1.5 rounded-full text-xs font-extrabold transition-all bg-white text-indigo-600 shadow-sm">EN</button>
+            <button onclick="setLanguage('bn')" id="btn-bn" class="px-4 py-1.5 rounded-full text-xs font-extrabold transition-all text-slate-400 hover:text-slate-600">বাংলা</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="hidden lg:flex w-72 bg-white border-r p-8 flex-col gap-8">
+            <div>
+                <h3 id="ui-areas" class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-5">Expertise Domains</h3>
+                <div class="space-y-3">
+                    <div class="p-4 bg-indigo-50 rounded-2xl text-indigo-600 text-sm font-bold flex items-center gap-3 border border-indigo-100/50">
+                        <i class="fas fa-globe"></i> Real-time Web Search
+                    </div>
+                    <div class="p-4 text-slate-500 text-sm font-semibold flex items-center gap-3 hover:bg-slate-50 rounded-2xl transition-colors">
+                        <i class="fas fa-brain"></i> Adaptive Learning
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Credit Card -->
+            <div class="mt-auto space-y-6">
+                <div class="dev-badge p-5 rounded-[2rem] text-white shadow-xl shadow-indigo-100 relative overflow-hidden group">
+                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
+                    <p class="text-[9px] font-black uppercase tracking-[0.25em] opacity-80 mb-2">Developed By</p>
+                    <p class="text-sm font-extrabold tracking-tight">Ahyan Bin Ahsan</p>
+                    <div class="mt-3 flex items-center gap-2">
+                        <div class="h-[2px] w-8 bg-white/40"></div>
+                        <i class="fas fa-microchip text-[10px] opacity-60"></i>
+                    </div>
+                </div>
+                <div class="px-2">
+                    <p class="text-[10px] text-slate-400 font-medium leading-relaxed italic">
+                        <i class="fas fa-wifi mr-1"></i> Connected to Live Internet. Responses are grounded in real-time data.
+                    </p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Chat Area -->
+        <div class="flex-1 flex flex-col relative bg-[#fcfcfd]">
+            <div id="chat-window" class="chat-container flex-1 overflow-y-auto p-4 md:p-10 space-y-8 pb-48"></div>
+
+            <!-- Input Section -->
+            <div class="absolute bottom-0 w-full p-6 md:p-10 bg-gradient-to-t from-[#fcfcfd] via-[#fcfcfd] to-transparent">
+                <div class="max-w-4xl mx-auto space-y-5">
+                    
+                    <!-- Quick Action Chips -->
+                    <div id="action-chips" class="flex gap-2 overflow-x-auto no-scrollbar pb-2"></div>
+
+                    <!-- Input Form -->
+                    <form id="chat-form" class="flex items-center gap-3 bg-white p-3 rounded-[2.5rem] border border-slate-200 shadow-2xl shadow-indigo-100/20 focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all">
+                        <input type="text" id="user-input" autocomplete="off" class="flex-1 bg-transparent border-none focus:ring-0 px-5 py-3 text-sm md:text-base font-medium text-slate-700" placeholder="Ask any help for your startup.">
+                        <button type="submit" id="submit-btn" class="bg-indigo-600 text-white h-12 w-12 md:h-14 md:w-14 rounded-full flex items-center justify-center hover:bg-indigo-700 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-indigo-200">
+                            <i id="send-icon" class="fas fa-paper-plane md:text-lg"></i>
+                        </button>
+                    </form>
+                    
+                    <!-- Mobile Visual Credit -->
+                    <div class="lg:hidden flex flex-col items-center gap-2 pt-2">
+                        <div class="flex items-center gap-2 px-4 py-1.5 bg-indigo-50 rounded-full border border-indigo-100">
+                             <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Dev:</span>
+                             <span class="text-[10px] font-extrabold text-indigo-700">Ahyan Bin Ahsan</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // API Key is handled by the internal environment for this autonomous version
+        const apiKey = ""; 
+        let currentLanguage = 'en';
+
+        const categories = [
+            { en: 'Trending News', bn: 'সাম্প্রতিক সংবাদ', icon: 'fa-newspaper', prompt: 'What are the latest startup trends in Bangladesh for 2024?' },
+            { en: 'Market Research', bn: 'বাজার গবেষণা', icon: 'fa-magnifying-glass-chart', prompt: 'Find the current market size of e-commerce in Southeast Asia.' },
+            { en: 'Competitor Analysis', bn: 'প্রতিযোগী বিশ্লেষণ', icon: 'fa-users-viewfinder', prompt: 'Search for top competitors in the food-tech industry.' },
+            { en: 'Funding News', bn: 'ফান্ডিং আপডেট', icon: 'fa-money-bill-trend-up', prompt: 'List recent major startup funding rounds in Asia.' }
+        ];
+
+        const content = {
+            en: { 
+                welcome: "Assalamu Alaikum! I am Startup Mentor AI. I am now connected to the internet and can provide real-time data for your business journey. How can I help you today?", 
+                placeholder: "Ask any help for your startup.", 
+                thinking: "Browsing the web for latest info...",
+                areas: "Intelligence Domains"
+            },
+            bn: { 
+                welcome: "আসসালামু আলাইকুম! আমি স্টার্টআপ মেন্টর এআই। আমি এখন ইন্টারনেটের সাথে সরাসরি যুক্ত এবং আপনাকে সাম্প্রতিক তথ্য দিয়ে সাহায্য করতে পারি। আজ আপনার জন্য কী খুঁজতে পারি?", 
+                placeholder: "আপনার স্টার্টআপের জন্য যেকোনো সাহায্য চান।", 
+                thinking: "ইন্টারনেট থেকে তথ্য খুঁজছি...",
+                areas: "ইন্টেলিজেন্স বিভাগ"
+            }
+        };
+
+        function renderChips() {
+            const container = document.getElementById('action-chips');
+            container.innerHTML = '';
+            categories.forEach(cat => {
+                const label = currentLanguage === 'en' ? cat.en : cat.bn;
+                const chip = document.createElement('button');
+                chip.className = "flex items-center gap-2.5 px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-[11px] font-bold text-slate-600 hover:border-indigo-500 hover:text-indigo-600 hover:bg-indigo-50/30 transition-all shadow-sm whitespace-nowrap active:scale-95";
+                chip.innerHTML = `<i class="fas ${cat.icon} text-indigo-500"></i> ${label}`;
+                chip.onclick = () => {
+                    document.getElementById('user-input').value = cat.prompt;
+                    document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+                };
+                container.appendChild(chip);
+            });
+        }
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.getElementById('btn-en').className = lang === 'en' ? 'px-4 py-1.5 rounded-full text-xs font-extrabold transition-all bg-white text-indigo-600 shadow-sm' : 'px-4 py-1.5 rounded-full text-xs font-extrabold transition-all text-slate-400 hover:text-slate-600';
+            document.getElementById('btn-bn').className = lang === 'bn' ? 'px-4 py-1.5 rounded-full text-xs font-extrabold transition-all bg-white text-indigo-600 shadow-sm' : 'px-4 py-1.5 rounded-full text-xs font-extrabold transition-all text-slate-400 hover:text-slate-600';
+            document.getElementById('user-input').placeholder = content[lang].placeholder;
+            document.getElementById('ui-areas').innerText = content[lang].areas;
+            renderChips();
+            if (document.getElementById('chat-window').children.length === 0) addMessage('bot', content[lang].welcome);
+        }
+
+        function addMessage(role, text, sources = []) {
+            const win = document.getElementById('chat-window');
+            const div = document.createElement('div');
+            div.className = `flex w-full ${role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`;
+            
+            let sourceHtml = '';
+            if (sources.length > 0) {
+                sourceHtml = `<div class="mt-4 pt-3 border-t border-slate-100 text-[10px] text-slate-400 font-medium">
+                    <p class="mb-2 font-bold uppercase tracking-wider text-indigo-400">Verified Sources:</p>
+                    <div class="flex flex-wrap gap-2">
+                        ${sources.slice(0, 3).map(s => `<a href="${s.uri}" target="_blank" class="bg-slate-50 px-2 py-1 rounded border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 transition-all truncate max-w-[150px]"><i class="fas fa-link mr-1"></i> ${s.title || 'Source'}</a>`).join('')}
+                    </div>
+                </div>`;
+            }
+
+            div.innerHTML = `
+                <div class="flex gap-4 max-w-[92%] md:max-w-[85%] ${role === 'user' ? 'flex-row-reverse' : ''}">
+                    <div class="w-9 h-9 md:w-11 md:h-11 rounded-2xl flex items-center justify-center flex-shrink-0 ${role === 'user' ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-indigo-600'} shadow-md">
+                        <i class="fas ${role === 'user' ? 'fa-user' : 'fa-robot'} text-sm"></i>
+                    </div>
+                    <div class="p-5 md:p-6 rounded-[2rem] shadow-sm text-sm md:text-base leading-relaxed ${role === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white border border-slate-100 rounded-tl-none text-slate-800'}">
+                        <div class="whitespace-pre-wrap">${text}</div>
+                        ${sourceHtml}
+                    </div>
+                </div>`;
+            win.appendChild(div);
+            win.scrollTop = win.scrollHeight;
+        }
+
+        async function callAutonomousAI(prompt) {
+            const systemPrompt = `You are "Startup Mentor AI", an autonomous business intelligence system.
+            KEY FEATURE: You have live access to Google Search. Always use it to verify market data, news, and trends.
+            MISSION: Help the user with startups, business management, and marketing.
+            If the user asks something outside business, gently redirect them.
+            Current Language: ${currentLanguage}. Respond naturally in that language.`;
+
+            try {
+                // Using Gemini 2.5 Flash with Google Search Tools
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                        tools: [{ "google_search": {} }]
+                    })
+                });
+
+                const data = await response.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm having trouble processing that right now.";
+                const sources = data.candidates?.[0]?.groundingMetadata?.groundingAttributions?.map(a => ({ 
+                    uri: a.web?.uri, 
+                    title: a.web?.title 
+                })) || [];
+
+                return { text, sources };
+            } catch (e) {
+                console.error(e);
+                return { text: "I encountered an error while accessing the web. Please try again in a moment.", sources: [] };
+            }
+        }
+
+        document.getElementById('chat-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('user-input');
+            const btn = document.getElementById('submit-btn');
+            const icon = document.getElementById('send-icon');
+            const val = input.value.trim();
+            if (!val) return;
+
+            addMessage('user', val);
+            input.value = '';
+            
+            // UI State for thinking
+            btn.disabled = true;
+            icon.className = "fas fa-circle-notch fa-spin md:text-lg";
+            
+            const result = await callAutonomousAI(val);
+            
+            addMessage('bot', result.text, result.sources);
+            
+            btn.disabled = false;
+            icon.className = "fas fa-paper-plane md:text-lg";
+        };
+
+        window.onload = () => setLanguage('en');
+    </script>
+</body>
+</html>
+
